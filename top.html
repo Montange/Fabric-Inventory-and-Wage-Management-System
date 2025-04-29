@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Top Navigation</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Container to hold the buttons -->
+    <div class="top-nav">
+        <!-- Back button (links to the previous page or dashboard) -->
+        <a href="javascript:history.back()" id="backButton">Back</a>
+        
+        <!-- Logout button that triggers the logout confirmation dialog -->
+        <button id="logoutButton" onclick="showConfirmationDialog()">Logout</button>
+    </div>
+
+    <!-- Confirmation Dialog for Logout -->
+    <div id="dialogOverlay" class="dialog-overlay">
+        <div class="dialog">
+            <p>Are you sure you want to logout?</p>
+            <button class="confirm" onclick="logout()">Yes</button>
+            <button class="cancel" onclick="hideConfirmationDialog()">No</button>
+        </div>
+    </div>
+
+
+    <script src="script.js"></script>
+</body>
+</html>

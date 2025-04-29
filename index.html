@@ -1,0 +1,86 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="style.css"> <!-- Optional: Include external CSS file for styling -->
+
+    <style>
+        /* Modal Styling */
+        #errorModal {
+            display: none; /* Hidden by default */
+            position: fixed;
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5); /* Black background with opacity */
+            overflow: auto; /* Enable scroll if needed */
+            padding-top: 100px;
+        }
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: auto;
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%;
+            max-width: 300px;
+            text-align: center;
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        
+        <h1>Login</h1>
+        <form action="login.php" method="POST">
+          <input type="text" name="username" placeholder="Username" required><br>
+          <input type="password" name="password" placeholder="Password" required><br>
+          <button type="submit">Login</button>
+        </form>
+    </div>
+
+    <!-- Modal Dialog for Error Message -->
+    <div id="errorModal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal()">&times;</span>
+            <p>Invalid username or password.</p>
+        </div>
+    </div>
+
+    <script>
+        // Function to display the modal if error=1 in URL
+        window.onload = function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.get('error') === '1') {
+                document.getElementById('errorModal').style.display = 'block';
+                setTimeout(closeModal, 3000); // Automatically close after 3 seconds
+            }
+        };
+
+        // Close the modal when the user clicks on the 'x'
+        function closeModal() {
+            document.getElementById('errorModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

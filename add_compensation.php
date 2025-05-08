@@ -1,39 +1,38 @@
-<?php include('top.html'); ?>  <!-- This will include the top layout -->
-
+<?php include('top.html'); ?>
 <?php
 session_start();
-
 if (!isset($_SESSION['logged_in'])) {
     header("Location: index.html");
     exit();
 }
-
 include 'db.php';
 
 // Initialize the message variable
 $message = '';
-$message_type = '';  // 'success' or 'error'
+$message_type = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tailor_id = $_POST['tailor_id'];
-    $output_type = $_POST['output_type'];
+    $output_id = $_POST['output_type'];  // Output type is selected by the user
     $output_quantity = $_POST['output_quantity'];
 
-    // Fetch current compensation
-    $stmt = $conn->prepare("SELECT current_compensation FROM tailors WHERE id = ?");
-    $stmt->bind_param("i", $tailor_id);
+    // Get rate and type based on output_type (now using output_type instead of output_id)
+    $stmt = $conn->prepare("SELECT output_type, rate FROM output_rates WHERE output_type = ?");
+    $stmt->bind_param("s", $output_id);  // Bind output_type (assuming it's a string)
     $stmt->execute();
-    $result = $stmt->get_result();
-    $tailor = $result->fetch_assoc();
+    $rate_result = $stmt->get_result();
+    $output_data = $rate_result->fetch_assoc();
 
-    if ($tailor) {
-        $new_compensation = $tailor['current_compensation'] + ($output_quantity * 10); // Rate = 10
+    if ($output_data) {
+        $output_type = $output_data['output_type'];
+        $rate = $output_data['rate'];
+        $added_comp = $output_quantity * $rate;
 
         // Update tailor compensation
-        $update_stmt = $conn->prepare("UPDATE tailors SET current_compensation = ? WHERE id = ?");
-        $update_stmt->bind_param("di", $new_compensation, $tailor_id);
+        $update_stmt = $conn->prepare("UPDATE tailors SET current_compensation = current_compensation + ? WHERE id = ?");
+        $update_stmt->bind_param("di", $added_comp, $tailor_id);
 
-        // Also insert into outputs table for history
+        // Insert into outputs
         $insert_output_stmt = $conn->prepare("INSERT INTO outputs (tailor_id, output_type, quantity) VALUES (?, ?, ?)");
         $insert_output_stmt->bind_param("isi", $tailor_id, $output_type, $output_quantity);
 
@@ -44,11 +43,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $message = "Error: " . $conn->error;
             $message_type = 'error';
         }
-        
+
         $update_stmt->close();
         $insert_output_stmt->close();
     } else {
-        $message = "Tailor not found.";
+        $message = "Invalid output type.";
         $message_type = 'error';
     }
 
@@ -61,7 +60,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Add Compensation</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -83,8 +81,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <label for="output_type">Output Type:</label>
         <select name="output_type" id="output_type" required>
-            <option value="Type1">Type1</option>
-            <option value="Type2">Type2</option>
+            <?php
+            include 'db.php';
+            $types = $conn->query("SELECT * FROM output_rates");
+            while ($type = $types->fetch_assoc()) {
+                echo "<option value='" . $type['output_type'] . "'>" . $type['output_type'] . " (₱" . $type['rate'] . ")</option>";
+            }
+            $conn->close();
+            ?>
         </select>
 
         <label for="output_quantity">Quantity:</label>
@@ -92,9 +96,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <button type="submit">Add Compensation</button>
     </form>
+
+    <br>
+    
 </div>
 
-<!-- Success/Error Message Dialog -->
+<!-- Message Overlay -->
 <?php if ($message): ?>
     <div class="dialog-overlay" id="messageDialog" style="display: flex;">
         <div class="dialog <?php echo $message_type; ?>">
@@ -104,12 +111,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <?php endif; ?>
 
 <script>
-    // Hide dialog after 3 seconds
-    <?php if ($message): ?>
-    setTimeout(function () {
+function confirmLogout() {
+    if (confirm("Are you sure you want to logout?")) {
+        window.location.href = "logout.php";
+    }
+}
+<?php if ($message): ?>
+    setTimeout(() => {
         document.getElementById('messageDialog').style.display = 'none';
     }, 3000);
-    <?php endif; ?>
+<?php endif; ?>
 </script>
 </body>
 </html>

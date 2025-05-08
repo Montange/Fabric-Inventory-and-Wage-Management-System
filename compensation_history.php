@@ -47,8 +47,7 @@ $paymentsResult = $paymentsQuery->get_result();
         <tr>
             <th>Output Type</th>
             <th>Quantity</th>
-            <th>Total Compensation Added</th>
-            <th>Date</th>
+            
         </tr>
         <?php while ($row = $outputsResult->fetch_assoc()): ?>
             <tr>
@@ -58,19 +57,7 @@ $paymentsResult = $paymentsQuery->get_result();
         <?php endwhile; ?>
     </table>
 
-    <h2>Payment History</h2>
-    <table border="1" cellpadding="10">
-        <tr>
-            <th>Total Paid</th>
-            <th>Date Paid</th>
-        </tr>
-        <?php while ($row = $paymentsResult->fetch_assoc()): ?>
-            <tr>
-                <td><?= number_format($row['amount'], 2) ?></td>
-                <td><?= $row['date_paid'] ?></td>
-            </tr>
-        <?php endwhile; ?>
-    </table>
+    
 </div>
 </body>
 </html>
